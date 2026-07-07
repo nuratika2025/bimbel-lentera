@@ -16,8 +16,14 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # Langkah 2: Menjalankan mesin uji otomatis untuk mengecek kebersihan kode HTML
-    - name: Run HTMLHint
-      uses: htmlhint/htmlhint-action@v2
+    # Langkah 2: Menggunakan Node.js untuk menjalankan linter
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        file_pattern: '*.html'
+        node-version: '20'
+
+    # Langkah 3: Menginstal dan menjalankan HTMLHint secara global lewat npm (paling aman & stabil)
+    - name: Install and Run HTMLHint
+      run: |
+        npm install -g htmlhint
+        htmlhint index.html
