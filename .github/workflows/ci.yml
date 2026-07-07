@@ -1,29 +1,59 @@
-name: Continuous Integration (HTML Lint)
+name: CI CD Pipeline Bimbel Lentera
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+
+# Memberikan izin ke token GitHub untuk melakukan deployment otomatis ke GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
+  # ======== TAHAP CI (INTEGRASI) ========
   html-validation:
-    name: Validate HTML Code
+    name: Validate HTML Code (CI)
     runs-on: ubuntu-latest
-
     steps:
-    # Langkah 1: Mengambil kode dari repositori GitHub
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # Langkah 2: Menggunakan Node.js untuk menjalankan linter
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
 
-    # Langkah 3: Menginstal dan menjalankan HTMLHint secara global lewat npm (paling aman & stabil)
     - name: Install and Run HTMLHint
       run: |
         npm install -g htmlhint
         htmlhint index.html
+
+  # ======== TAHAP CD (DEPLOYMENT) ========
+  deploy-to-pages:
+    name: Deploy to GitHub Pages (CD)
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: html-validation # Tahap CD hanya akan jalan JIKA Tahap CI sukses (centang hijau)
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+
+    - name: Upload Artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.' # Mengunggah seluruh isi folder utama termasuk index.html dan style.css
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
