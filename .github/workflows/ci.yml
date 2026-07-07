@@ -1,0 +1,23 @@
+name: Continuous Integration (HTML Lint)
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  html-validation:
+    name: Validate HTML Code
+    runs-on: ubuntu-latest
+
+    steps:
+    # Langkah 1: Mengambil kode dari repositori GitHub
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Langkah 2: Menjalankan mesin uji otomatis untuk mengecek kebersihan kode HTML
+    - name: Run HTMLHint
+      uses: htmlhint/htmlhint-action@v2
+      with:
+        file_pattern: '*.html'
